@@ -1,5 +1,12 @@
 import uvicorn
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
+from sqlite3 import DatabaseError
+from sqlite3 import IntegrityError
+from requests import Request
+from starlette.responses import JSONResponse
+
+from api.result import fail
 from api import api
 from task import TaskCenter
 from sdk.log import logger
@@ -8,6 +15,22 @@ import socket
 app = FastAPI()
 app.include_router(api.router)
 
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_exception_handler(request: Request, exc: RequestValidationError):
+    logger.error(f"参数不对{request.method} {request.url}")
+    return fail(exc.errors())
+
+
+@app.exception_handler(DatabaseError)
+async def database_exception_handler(request: Request, exc: DatabaseError):
+    logger.error(f"sql 错误   {request.url} {exc.args}")
+    return fail(msg=exc.args)
+
+@app.exception_handler(IntegrityError)
+async def database_exception_handler(request: Request, exc: IntegrityError):
+    logger.error(f"数据重复 错误   {request.url} {exc.args}")
+    return fail(msg=f"数据重复 错误  Ï {exc.args}")
 
 @app.on_event("shutdown")
 async def shutdown_event():
@@ -25,4 +48,4 @@ def get_ip_address():
 if __name__ == "__main__":
     ip = get_ip_address()
     logger.info("ip=%s" % ip)
-    uvicorn.run(app, host=ip, port=8000)
+    uvicorn.run(app,  port=8000)
