@@ -6,14 +6,18 @@ from sqlite3 import IntegrityError
 from requests import Request
 from starlette.responses import JSONResponse
 
-from api.result import fail
-from api import api
+from api.base_api import fail
+from api import base_api
+from api import config_api
+from api import task_api
 from task import TaskCenter
 from sdk.log import logger
 import socket
 
 app = FastAPI()
-app.include_router(api.router)
+app.include_router(base_api.router)
+app.include_router(config_api.router)
+app.include_router(task_api.router)
 
 
 @app.exception_handler(RequestValidationError)
@@ -30,7 +34,7 @@ async def database_exception_handler(request: Request, exc: DatabaseError):
 @app.exception_handler(IntegrityError)
 async def database_exception_handler(request: Request, exc: IntegrityError):
     logger.error(f"数据重复 错误   {request.url} {exc.args}")
-    return fail(msg=f"数据重复 错误  Ï {exc.args}")
+    return fail(msg=f"数据重复 错误  {exc.args}")
 
 @app.on_event("shutdown")
 async def shutdown_event():

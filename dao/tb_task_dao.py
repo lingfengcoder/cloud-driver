@@ -9,8 +9,8 @@ class TbTaskDao(BaseDao):
         return sql_tb_task
 
     def add(self, po: TbTaskPo):
-        sql = "insert into tb_task(`config_id`,`type`,`sync_src`,`sync_dest`,`schedule`) values (?,?,?,?,?)"
-        self.exe_sql(sql, (po.config_id, po.type, po.sync_src, po.sync_dest, po.schedule))
+        sql = "insert into tb_task(`config_id`,`type`,`sync_src`,`sync_dest`,`schedule`,`state`) values (?,?,?,?,?,?)"
+        self.exe_sql(sql, (po.config_id, po.type, po.sync_src, po.sync_dest, po.schedule,po.state))
 
     def delete(self, id):
         sql = "delete from tb_task where id=?"
@@ -24,6 +24,13 @@ class TbTaskDao(BaseDao):
         sql = "update tb_task set `schedule`=? where id=?"
         self.exe_sql(sql, (schedule, id))
 
+    def update_state(self, state, id):
+        sql = "update tb_task set `state`=? where id=?"
+        self.exe_sql(sql, (state, id))
+
     def list(self):
         sql = "select * from tb_task"
         return self.exe_sql(sql, ())
+    def query(self,config_id:int):
+        sql = "select * from tb_task where config_id=?"
+        return self.exe_sql(sql, [config_id])

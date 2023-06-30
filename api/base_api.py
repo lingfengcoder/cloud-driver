@@ -1,35 +1,19 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request, Path, Query, Body
 from task import TaskCenter
 from dao.init_dao import tbTaskDao
-from dao.po.tb_config_po import TbConfigPo
-from dao.po.tb_task_po import TbTaskPo
-from dao.init_dao import tbConfigDao
-from api.result import ok,fail
+from starlette.responses import JSONResponse
 
 router = APIRouter()
 
 
+def ok(data=None):
+    return JSONResponse({"code": 200, "data": data, "msg": "success"})
+def fail(msg):
+    return JSONResponse({"code": 400, "msg": msg})
+
 @router.get("/api/v1/hw")
 def read_root():
     return {"Hello": "World"}
-
-
-@router.get("/api/v1/items/{item_id}")
-def read_item(item_id: int):
-    return {"item_id": item_id}
-
-
-# tb_config
-@router.put("/api/v1/config/new")
-async def add_config(po:TbConfigPo):
-    tbConfigDao.add(po)
-    return ok()
-
-
-@router.get("/api/v1/config/all")
-async def task_list():
-    return tbConfigDao.list()
-
 
 @router.get("/api/v1/webdav/new")
 def task_list():
