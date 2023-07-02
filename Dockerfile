@@ -9,6 +9,6 @@ WORKDIR /code
 
 RUN pip install -r requirements.txt
 
-CMD ["python","/code/app.py"]
+#CMD ["python","/code/app.py"]
 
-#CMD ["uvicorn","app:app","--reload" ]
+CMD ["uvicorn","app:app","--reload" ]

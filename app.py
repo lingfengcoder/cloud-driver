@@ -4,7 +4,6 @@ from fastapi.exceptions import RequestValidationError
 from sqlite3 import DatabaseError
 from sqlite3 import IntegrityError
 from requests import Request
-from starlette.responses import JSONResponse
 
 from api.base_api import fail
 from api import base_api
@@ -13,12 +12,14 @@ from api import task_api
 from task import TaskCenter
 from sdk.log import logger
 import socket
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 app.include_router(base_api.router)
 app.include_router(config_api.router)
 app.include_router(task_api.router)
 
+app.mount("/web", StaticFiles(directory="web"), name="web")
 
 @app.exception_handler(RequestValidationError)
 async def request_validation_exception_handler(request: Request, exc: RequestValidationError):
