@@ -11,16 +11,23 @@ from sdk.Config import WebDavConfig
 from sdk.WebDavClient import get_webdav3_client
 
 
+class TASK_STATE:
+    ERROR = -1
+    WAIT = 0
+    RUN = 1
+    FINISHED = 2
+
+
 class WebDav:
     # dev前缀
     DAV = "/dav"
 
-    def __init__(self, config):
-        self.config = WebDavConfig(config.options, config.base)
+    def __init__(self, config: WebDavConfig):
+        self.config = config
         # webDav的客户端
         self.client = get_webdav3_client(config.options)
         # 定时任务
-        self.schedule = Schedule()
+        self.schedule = Schedule(config.base['schedule'])
         # 最多任务数
         self.MAX_TASK_NUM = 3
         # 多线程安全锁
@@ -29,6 +36,8 @@ class WebDav:
         self.PAUSE = True
         # 彻底关闭信号
         self.SHUT_DOWN = False
+        # 任务状态
+        self.STATE = 0
         # 执行任务列表
         self.TASK_LIST = []
         # 线程池
@@ -139,35 +148,36 @@ class WebDav:
             if self.PAUSE:
                 logger.info("list stop任务")
                 return
-            remote_file = item['path'].removeprefix(self.DAV+"/")
-            if item['isdir']:
-                # 递归处理
-                local_file = local + remote_file
-                if not os.path.exists(local_file):
-                    os.makedirs(local_file)
-                self.list(remote_file, local)
-            else:
-                logger.info("开始检测file:%s" % remote_file)
-                local_file = local + remote_file
-                if os.path.exists(local_file):
-                    if os.path.isfile(local_file):
-                        file_len = os.path.getsize(local + remote_file)
-                        # 远程文件和本地文件大小不一致，则进行下载
-                        remote_size = int(item['size'])
-                        if file_len < remote_size:
-                            self.submit_task(self.Task(remote_file, local_file, remote_size, file_len))
-                        else:
-                            logger.info("%s 已经下载完毕" % (remote_file))
-                    else:
-                        logger.info("检测是文件夹%s" % local_file)
-                        # os.remove(local_file)
-                        self.submit_task(self.Task(remote_file, local_file))
+            try:
+                remote_file = item['path'].removeprefix(self.DAV + "/")
+                if item['isdir']:
+                    # 递归处理
+                    local_file = local + remote_file
+                    if not os.path.exists(local_file):
+                        os.makedirs(local_file)
+                    self.list(remote_file, local)
                 else:
-                    self.submit_task(self.Task(remote_file, local_file))
-
-    # 初始化定时器
-    def init_schedule(self):
-        self.schedule = Schedule()
+                    logger.info("开始检测file:%s" % remote_file)
+                    local_file = local + remote_file
+                    if os.path.exists(local_file):
+                        if os.path.isfile(local_file):
+                            file_len = os.path.getsize(local + remote_file)
+                            # 远程文件和本地文件大小不一致，则进行下载
+                            remote_size = int(item['size'])
+                            if file_len < remote_size:
+                                self.submit_task(self.Task(remote_file, local_file, remote_size, file_len))
+                            else:
+                                logger.info("%s 已经下载完毕" % (remote_file))
+                        else:
+                            logger.info("检测是文件夹%s" % local_file)
+                            # os.remove(local_file)
+                            self.submit_task(self.Task(remote_file, local_file))
+                    else:
+                        self.submit_task(self.Task(remote_file, local_file))
+            except Exception as err:
+                logger.error("list err=%s msg:%s" % (err.__class__, err))
+                self.shutdown()
+                self.STATE = TASK_STATE.ERROR
 
     # 定时任务的回调
     def schedule_callback(self, enable):
@@ -201,8 +211,16 @@ class WebDav:
     def start(self):
         # 启动定时任务
         if self.schedule == None:
-            self.init_schedule()
-        self.schedule.time_work(callback=self.schedule_callback)
+            # self.init_schedule(schedule=None)
+            logger.error("schedule is None,can not run job")
+        else:
+            self.schedule.time_work(callback=self.schedule_callback)
+
+    # 更新定时任务
+    def update_schedule(self, schedule):
+        self.shutdown()
+        self.schedule = Schedule(schedule)
+        self.start()
 
     # 停止工作
     def stop(self):
@@ -210,7 +228,7 @@ class WebDav:
         # 定时任务关闭
         self.schedule.shutdown()
         # 清除定时器
-        self.schedule = None
+        # self.schedule = None
 
     # 彻底关机
     def shutdown(self):
@@ -220,6 +238,27 @@ class WebDav:
         self.stop()
         # 关闭线程池
         self.pool.shutdown(wait=False, cancel_futures=True)
+
+    #
+    def test(self):
+        logger.info("test")
+        try:
+            self.client.check("/")
+            return True
+        except Exception as e:
+            logger.error(e)
+        return False
+
+
+def test(config: WebDavConfig):
+    try:
+        client = get_webdav3_client(config.options)
+        data = client.info("/")
+        logger.info("test:%s" % data)
+        return True
+    except Exception as e:
+        logger.error(e)
+    return False
 
 
 if __name__ == '__main__':
@@ -235,7 +274,7 @@ if __name__ == '__main__':
     }
     config = WebDavConfig(options, base)
     webdav = WebDav(config=config)
-    webdav.run()
+    webdav.start()
     while 1:
         time.sleep(100)
 

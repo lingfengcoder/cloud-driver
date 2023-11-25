@@ -38,8 +38,8 @@ class TbConfigDao(BaseDao):
     def list(self):
         sql = "select * from tb_config"
         list = self.exe_sql(sql, ())
-        for item in list:
-            item['password'] = "***"
+        # for item in list:
+        #     item['password'] = "***"
         return list
 
     def query_by_id(self, id):

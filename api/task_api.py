@@ -20,7 +20,8 @@ async def add(po: TbTaskPo):
 # 获取所有的(未分页)
 @router.get("/api/v1/task/all")
 async def all():
-    return tbTaskDao.list()
+    data=tbTaskDao.list()
+    return ok(data)
 
 
 # 删除指定
@@ -30,7 +31,7 @@ async def delete(id: int):
     return ok()
 
 
-# 更新
+# 更新 任务
 @router.put("/api/v1/task/{id}")
 async def update(id: int = Path(...),
                  sync_src: str = Body(""), sync_dest: str = Body(""), schedule: str = Body("")):
@@ -40,8 +41,32 @@ async def update(id: int = Path(...),
         tbTaskDao.update_schedule(schedule, id)
     return ok()
 
+# 更新 state
 @router.put("/api/v1/task/state/{id}")
 async def state(id: int = Path(...),
                 state: int = Query(...)):
     tbTaskDao.update_state(state, id)
     return ok()
+
+# 更新 schedule
+@router.put("/api/v1/task/schedule/{id}")
+async def schedule(id: int = Path(...),
+                   schedule: str = Query(...)):
+    tbTaskDao.update_schedule(schedule, id)
+    return ok()
+
+# 更新 sync_src sync_dest
+@router.put("/api/v1/task/path/{id}")
+async def path(id: int = Path(...),
+               sync_src: str = Query(...), sync_dest: str = Query(...)):
+    tbTaskDao.update_path(sync_src=sync_src, sync_dest=sync_dest, id=id)
+    return ok()
+
+#更新 config_id
+@router.put("/api/v1/task/config/{id}")
+async def config(id: int = Path(...),
+                    config_id: int = Query(...)):
+        tbTaskDao.update_config(config_id, id)
+        return ok()
+
+

@@ -65,5 +65,5 @@ if __name__ == '__main__':
 
     list = tbTaskDao.list()
     logger.info(list)
-    param=TbTaskPo(1, 'sync_src-1', 'sync_dest-1', 1,"schedule-1",0)
+    param=new(1)
     tbTaskDao.add(param)

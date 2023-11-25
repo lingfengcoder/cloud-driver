@@ -1,9 +1,8 @@
-
 class WebDavConfig:
-
-    base={
-        "sync_src":"",
-        "sync_dest":""
+    base = {
+        "sync_src": "",
+        "sync_dest": "",
+        "schedule": ""
     }
 
     options = {
@@ -12,6 +11,10 @@ class WebDavConfig:
         'webdav_password': "",
         "disable_check": True,
     }
-    def __init__(self,option,base):
-       self.options=option
-       self.base=base
+    # 上次更新的时间 0代表仅仅初始化没有任何更新
+    lastUpdateTime = 0
+
+    def __init__(self, option, base, lastUpdateTime):
+        self.options = option
+        self.base = base
+        self.lastUpdateTime = lastUpdateTime

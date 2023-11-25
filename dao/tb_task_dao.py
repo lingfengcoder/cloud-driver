@@ -17,8 +17,12 @@ class TbTaskDao(BaseDao):
         self.exe_sql(sql, (id))
 
     def update_path(self, sync_src, sync_dest, id):
-        sql = "update tb_task set `sync_src`=? and sync_dest=?  where id=?"
+        sql = "update tb_task set `sync_src`=? , sync_dest=?  where id=?"
         self.exe_sql(sql, (sync_src, sync_dest, id))
+
+    def update_src_path(self, sync_src,  id):
+        sql = "update `tb_task` set `sync_src`= ? where id = ? "
+        self.exe_sql(sql, (sync_src, id))
 
     def update_schedule(self, schedule, id):
         sql = "update tb_task set `schedule`=? where id=?"
@@ -30,7 +34,7 @@ class TbTaskDao(BaseDao):
 
     def list(self):
         sql = "select * from tb_task"
-        return self.exe_sql(sql, ())
+        return self.exe_sql(sql)
     def query(self,config_id:int):
         sql = "select * from tb_task where config_id=?"
         return self.exe_sql(sql, [config_id])

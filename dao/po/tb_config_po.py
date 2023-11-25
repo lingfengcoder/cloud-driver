@@ -13,7 +13,7 @@ class TbConfigPo(BaseModel):
     username: str
     password: str
 
-    def __init__(self, type, host, username, password):
+    def __init__(self, type, host, username, password,**kwargs):
         super().__init__(type=type,host=host,username=username,password=password)
         self.type = type
         self.host = host

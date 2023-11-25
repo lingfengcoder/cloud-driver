@@ -2,8 +2,10 @@ from sdk.log import logger
 import time
 import threading
 
+
 class Schedule:
     job = {
+        "0": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 23],
         "1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 23],
         "2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 23],
         "3": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 23],
@@ -13,10 +15,10 @@ class Schedule:
         "7": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 23],
     }
 
-    def __init__(self):
+    def __init__(self, job):
         self.SHUT_DOWN = False
         self.THREAD = None
-        self.job = Schedule.job
+        self.job = job
 
     def get_job(self, x):
         return self.job[x]
@@ -37,6 +39,7 @@ class Schedule:
             # count += 10
             time.sleep(5)
             # time.sleep(10 * 60)
+
     def time_work(self, callback):
         if self.THREAD == None or not self.THREAD.is_alive():
             self.THREAD = threading.Thread(target=self.daemon_check, args=[callback], daemon=True)

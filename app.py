@@ -13,8 +13,16 @@ from task import TaskCenter
 from sdk.log import logger
 import socket
 from fastapi.staticfiles import StaticFiles
-
+from fastapi.middleware.cors import CORSMiddleware
+from task.JobSchedule import JobSchedule
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(base_api.router)
 app.include_router(config_api.router)
 app.include_router(task_api.router)
@@ -53,4 +61,5 @@ def get_ip_address():
 if __name__ == "__main__":
     ip = get_ip_address()
     logger.info("ip=%s" % ip)
+    JobSchedule().run()
     uvicorn.run(app,  port=8000)
