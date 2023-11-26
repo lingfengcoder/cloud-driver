@@ -82,7 +82,7 @@ def stop_task(task_id):
         webdav = item['webdav']
         webdav.stop()
         return True
-    logger.error("任务不存在task_id: %s" % task_id)
+    # logger.error("任务不存在task_id: %s" % task_id)
     return False
 #删除任务
 def delete_task(task_id):
@@ -92,7 +92,7 @@ def delete_task(task_id):
         webdav.shutdown()
         del map[task_id]
         return True
-    logger.error("任务不存在task_id: %s" % task_id)
+    # logger.error("任务不存在task_id: %s" % task_id)
     return False
 
 # 继续任务

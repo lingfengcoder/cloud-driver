@@ -135,49 +135,48 @@ class WebDav:
     # 扫描远程目录与本地目录进行对比
     # 1.创建缺失的目录 2.下载缺失的文件
     def list(self, path: str, local: str):
-        # path = path if path.endswith("/") else path + "/"
-        # prefix = self.DAV + path
-        # logger.info("list prefix=%s" % prefix)
-        if self.PAUSE:
-            logger.info("list stop任务")
-            return
-        logger.info("list: %s" % path)
-        files = self.client.list(path, True)
-
-        for item in files[1:]:
+        try:
+            # path = path if path.endswith("/") else path + "/"
+            # prefix = self.DAV + path
+            # logger.info("list prefix=%s" % prefix)
             if self.PAUSE:
                 logger.info("list stop任务")
                 return
-            try:
-                remote_file = item['path'].removeprefix(self.DAV + "/")
-                if item['isdir']:
-                    # 递归处理
-                    local_file = local + remote_file
-                    if not os.path.exists(local_file):
-                        os.makedirs(local_file)
-                    self.list(remote_file, local)
-                else:
-                    logger.info("开始检测file:%s" % remote_file)
-                    local_file = local + remote_file
-                    if os.path.exists(local_file):
-                        if os.path.isfile(local_file):
-                            file_len = os.path.getsize(local + remote_file)
-                            # 远程文件和本地文件大小不一致，则进行下载
-                            remote_size = int(item['size'])
-                            if file_len < remote_size:
-                                self.submit_task(self.Task(remote_file, local_file, remote_size, file_len))
-                            else:
-                                logger.info("%s 已经下载完毕" % (remote_file))
-                        else:
-                            logger.info("检测是文件夹%s" % local_file)
-                            # os.remove(local_file)
-                            self.submit_task(self.Task(remote_file, local_file))
+            logger.info("list: %s" % path)
+            files = self.client.list(path, True)
+            for item in files[1:]:
+                if self.PAUSE:
+                    logger.info("list stop任务")
+                    return
+                    remote_file = item['path'].removeprefix(self.DAV + "/")
+                    if item['isdir']:
+                        # 递归处理
+                        local_file = local + remote_file
+                        if not os.path.exists(local_file):
+                            os.makedirs(local_file)
+                        self.list(remote_file, local)
                     else:
-                        self.submit_task(self.Task(remote_file, local_file))
-            except Exception as err:
-                logger.error("list err=%s msg:%s" % (err.__class__, err))
-                self.shutdown()
-                self.STATE = TASK_STATE.ERROR
+                        logger.info("开始检测file:%s" % remote_file)
+                        local_file = local + remote_file
+                        if os.path.exists(local_file):
+                            if os.path.isfile(local_file):
+                                file_len = os.path.getsize(local + remote_file)
+                                # 远程文件和本地文件大小不一致，则进行下载
+                                remote_size = int(item['size'])
+                                if file_len < remote_size:
+                                    self.submit_task(self.Task(remote_file, local_file, remote_size, file_len))
+                                else:
+                                    logger.info("%s 已经下载完毕" % (remote_file))
+                            else:
+                                logger.info("检测是文件夹%s" % local_file)
+                                # os.remove(local_file)
+                                self.submit_task(self.Task(remote_file, local_file))
+                        else:
+                            self.submit_task(self.Task(remote_file, local_file))
+        except Exception as err:
+            logger.error("list err=%s msg:%s" % (err.__class__, err))
+            self.shutdown()
+            self.STATE = TASK_STATE.ERROR
 
     # 定时任务的回调
     def schedule_callback(self, enable):

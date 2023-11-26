@@ -1,6 +1,0 @@
-INFO 2023-07-17 22:29:30,130 140704508806720 63 - ip=127.0.0.1
-ERROR 2023-07-17 22:29:56,238 140704508806720 241 - Invalid URL 'host-2/': No scheme supplied. Perhaps you meant https://host-2/?
-ERROR 2023-07-17 22:29:57,260 140704508806720 241 - Invalid URL 'localhost/': No scheme supplied. Perhaps you meant https://localhost/?
-INFO 2023-07-17 22:29:58,239 140704508806720 238 - test:{'created': None, 'name': 'root', 'size': None, 'modified': 'Mon, 01 Jan 0001 00:00:00 GMT', 'etag': None, 'content_type': None}
-INFO 2023-07-17 22:30:06,065 140704508806720 238 - test:{'created': None, 'name': 'root', 'size': None, 'modified': 'Mon, 01 Jan 0001 00:00:00 GMT', 'etag': None, 'content_type': None}
-INFO 2023-07-17 23:36:33,156 140704508806720 63 - ip=127.0.0.1

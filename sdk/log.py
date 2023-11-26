@@ -3,7 +3,7 @@ from logging import handlers
 import os
 def log_def():
     fmt = "%(levelname)s %(asctime)s %(thread)d %(lineno)d - %(message)s"
-    path="./log"
+    path="/tmp/log"
     name = path+"/info.log"
     if not os.path.exists(path):
         os.makedirs(path)
