@@ -7,14 +7,15 @@ from pydantic import BaseModel
 
 @dataclass
 class TbConfigPo(BaseModel):
-    id: int | None = None
+    id: int
     type: int
     host: str
     username: str
     password: str
 
-    def __init__(self, type, host, username, password,**kwargs):
-        super().__init__(type=type,host=host,username=username,password=password)
+    def __init__(self,id, type, host, username, password,**kwargs):
+        super().__init__(id=id,type=type,host=host,username=username,password=password)
+        self.id=id
         self.type = type
         self.host = host
         self.username = username

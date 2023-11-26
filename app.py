@@ -62,4 +62,4 @@ if __name__ == "__main__":
     ip = get_ip_address()
     logger.info("ip=%s" % ip)
     JobSchedule().run()
-    uvicorn.run(app,  port=8000)
+    uvicorn.run(app,  port=8000,host="0.0.0.0")

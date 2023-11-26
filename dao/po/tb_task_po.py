@@ -5,7 +5,7 @@ from datetime import datetime
 
 @dataclass
 class TbTaskPo(BaseModel):
-    id: int | None = None
+    id: int
     config_id: int
     sync_src: str
     sync_dest: str
@@ -18,7 +18,8 @@ class TbTaskPo(BaseModel):
     #     for key in dictionary:
     #       setattr(self, key, dictionary[key])
     def __init__(self, id, config_id, sync_src, sync_dest, type, schedule, state, update_time, **kwargs):
-        super().__init__(config_id=config_id, sync_src=sync_src, sync_dest=sync_dest, type=type, schedule=schedule,
+        super().__init__(config_id=config_id, id=id, sync_src=sync_src, sync_dest=sync_dest, type=type,
+                         schedule=schedule,
                          state=state)
         self.type = type
         self.id = id
