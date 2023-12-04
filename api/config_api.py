@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, Path, Query, Body
 
+from api.dto.tb_config_dto import TbConfigDto
 from dao.po.tb_config_po import TbConfigPo
 from dao.init_dao import tbConfigDao, tbTaskDao
 from api.base_api import ok, fail
@@ -13,7 +14,9 @@ router = APIRouter()
 # tb_config
 # 添加新的配置
 @router.post("/api/v1/config/new")
-async def add_config(po: TbConfigPo):
+async def add_config(dto: TbConfigDto):
+    po = TbConfigPo(id=0, type=dto.type, host=dto.host, username=dto.username, password=dto.password,
+                    create_time=None, update_time=None)
     tbConfigDao.add(po)
     return ok("")
 
@@ -38,13 +41,15 @@ async def delete_config(id: int = Path(...)):
 # 更新配置
 @router.put("/api/v1/config/{id}")
 async def config_update(id: int = Path(...),
-                        username: str = Body(...), password: str = Body(...), type: int = Body(0)):
+                       host:str= Body(...), username: str = Body(...), password: str = Body(...), type: int = Body(0)):
     if password != None:
         tbConfigDao.update_password(password, id)
     if username != None:
         tbConfigDao.update_username(username, id)
     if type != None and type > 0:
         tbConfigDao.update_type(type, id)
+    if host!=None and host!="":
+        tbConfigDao.update_host(host, id)
     return ok("")
 
 
@@ -58,7 +63,7 @@ async def config_test(host: str = Body(...),
         'webdav_password': password,
         "disable_check": True,
     }
-    config = WebDavConfig(options,None)
+    config = WebDavConfig(options, None, None)
     if WebDav.test(config):
         return ok()
     else:

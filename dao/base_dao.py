@@ -1,7 +1,8 @@
 import json
+import os
 import sqlite3
 
-db = "cloud_driver.db"
+db = "/opt/cloud-driver-lf/cloud_driver_lf.db"
 
 
 class BaseDao:
@@ -11,6 +12,9 @@ class BaseDao:
         return
 
     def __init__(self):
+        #是否存在,如果不存在则创建
+        if not os.path.isfile(db):
+            open(db, 'a').close()
         sql = self.create_tb()
         self.exe_sql(sql)
 

@@ -71,5 +71,5 @@ class JobSchedule:
         self.THREAD.start()
 
     def shutdown(self):
-        logger.info("schedule shutdown")
+        logger.info("Job-schedule shutdown")
         self.SHUT_DOWN = True

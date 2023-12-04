@@ -77,7 +77,7 @@ class WebDav:
             count += 1
             if self.TASK_LIST != None and len(self.TASK_LIST) > 0:
                 self.print_list(self.TASK_LIST)
-            logger.info("第%s此尝试: %s" % (count, task.remote_path))
+            # logger.info("第%s此尝试: %s" % (count, task.remote_path))
             if self.add_task(task):
                 time.sleep(random.randint(1, self.http.SPEED_LIMIT_TIME))
                 self.pool.submit(self.sync, task)
@@ -105,10 +105,12 @@ class WebDav:
         else:
             logger.info(
                 f"开始断点续传:%s %s {task.local_size}-{task.remote_size}" % (task.remote_path, task.local_size))
-
-        self.http.append_file(_client=self.client, remote_path=task.remote_path, remote_size=task.remote_size,
-                              local_size=task.local_size,
-                              local_path=task.local_path, progress=self.process, progress_args={task})
+        try:
+            self.http.append_file(_client=self.client, remote_path=task.remote_path, remote_size=task.remote_size,
+                                  local_size=task.local_size,
+                                  local_path=task.local_path, progress=self.process, progress_args={task})
+        except Exception as e:
+            logger.error("sync err=%s msg:%s" % (e.__class__, e))
         self.complete(task)
 
     # 内部下载任务
@@ -148,31 +150,31 @@ class WebDav:
                 if self.PAUSE:
                     logger.info("list stop任务")
                     return
-                    remote_file = item['path'].removeprefix(self.DAV + "/")
-                    if item['isdir']:
-                        # 递归处理
-                        local_file = local + remote_file
-                        if not os.path.exists(local_file):
-                            os.makedirs(local_file)
-                        self.list(remote_file, local)
-                    else:
-                        logger.info("开始检测file:%s" % remote_file)
-                        local_file = local + remote_file
-                        if os.path.exists(local_file):
-                            if os.path.isfile(local_file):
-                                file_len = os.path.getsize(local + remote_file)
-                                # 远程文件和本地文件大小不一致，则进行下载
-                                remote_size = int(item['size'])
-                                if file_len < remote_size:
-                                    self.submit_task(self.Task(remote_file, local_file, remote_size, file_len))
-                                else:
-                                    logger.info("%s 已经下载完毕" % (remote_file))
+                remote_file = item['path'].removeprefix(self.DAV + "/")
+                if item['isdir']:
+                    # 递归处理
+                    local_file = local + remote_file
+                    if not os.path.exists(local_file):
+                        os.makedirs(local_file)
+                    self.list(remote_file, local)
+                else:
+                    local_file = local + "/" + remote_file
+                    logger.info("开始检测file:%s" % local_file)
+                    if os.path.exists(local_file):
+                        if os.path.isfile(local_file):
+                            file_len = os.path.getsize(local + remote_file)
+                            # 远程文件和本地文件大小不一致，则进行下载
+                            remote_size = int(item['size'])
+                            if file_len < remote_size:
+                                self.submit_task(self.Task(remote_file, local_file, remote_size, file_len))
                             else:
-                                logger.info("检测是文件夹%s" % local_file)
-                                # os.remove(local_file)
-                                self.submit_task(self.Task(remote_file, local_file))
+                                logger.info("%s 已经下载完毕" % (remote_file))
                         else:
+                            logger.info("检测是文件夹%s" % local_file)
+                            # os.remove(local_file)
                             self.submit_task(self.Task(remote_file, local_file))
+                    else:
+                        self.submit_task(self.Task(remote_file, local_file))
         except Exception as err:
             logger.error("list err=%s msg:%s" % (err.__class__, err))
             self.shutdown()

@@ -65,5 +65,5 @@ if __name__ == '__main__':
 
     list = tbTaskDao.list()
     logger.info(list)
-    param=new(1)
+    # param=new(1)
     tbTaskDao.add(param)

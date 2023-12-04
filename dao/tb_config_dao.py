@@ -35,6 +35,10 @@ class TbConfigDao(BaseDao):
         sql = "update tb_config set `type`=? where id=?"
         self.exe_sql(sql, (type, id))
 
+    def update_host(self, host, id):
+        sql = "update tb_config set `host`=? where id=?"
+        self.exe_sql(sql, (host, id))
+
     def list(self):
         sql = "select * from tb_config"
         list = self.exe_sql(sql, ())
